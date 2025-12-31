@@ -126,14 +126,12 @@ h1 span {
     width: 600px;
     height: 600px;
     background: var(--board-bg);
-    border: 5px solid var(--border-color);
-    border-radius: 10px;
-    display: grid;
-    grid-template-columns: repeat(15, 1fr);
-    grid-template-rows: repeat(15, 1fr);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    position: relative;
-    overflow: hidden;
+    /* Ensure board styles match new design */
+    border: 8px solid #2f3542;
+    border-radius: 20px;
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.5),
+        inset 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
 .cell {
@@ -146,32 +144,85 @@ h1 span {
 
 /* Homes */
 .home-area {
-    grid-row: span 6;
-    grid-column: span 6;
-    border: 2px solid var(--border-color);
-    padding: 30px;
-    display: grid;
-    place-items: center;
+    position: relative;
+    display: block;
 }
 
 .home-red {
     background-color: var(--red);
     grid-area: 1 / 1 / 7 / 7;
+    border-top-left-radius: 10px;
 }
 
 .home-green {
     background-color: var(--green);
     grid-area: 1 / 10 / 7 / 16;
+    border-top-right-radius: 10px;
 }
 
 .home-blue {
     background-color: var(--blue);
     grid-area: 10 / 1 / 16 / 7;
+    border-bottom-left-radius: 10px;
 }
 
 .home-yellow {
     background-color: var(--yellow);
     grid-area: 10 / 10 / 16 / 16;
+    border-bottom-right-radius: 10px;
+}
+
+.home-name {
+    position: absolute;
+    /* Position handled by specific classes */
+    background: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: 900;
+    font-size: 1rem;
+    color: #333;
+    z-index: 100;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+    border: 2px solid var(--border-color);
+}
+
+/* Side positioning for names */
+.home-red .home-name,
+.home-blue .home-name {
+    left: auto;
+    right: 100%;
+    top: 50%;
+    transform: translate(-15px, -50%);
+    /* 15px gap to the left */
+    border-color: inherit;
+    /* will take color from parent? No, need specific */
+}
+
+.home-red .home-name {
+    border-color: var(--red);
+}
+
+.home-blue .home-name {
+    border-color: var(--blue);
+}
+
+.home-green .home-name,
+.home-yellow .home-name {
+    left: 100%;
+    right: auto;
+    top: 50%;
+    transform: translate(15px, -50%);
+    /* 15px gap to the right */
+    border-color: inherit;
+}
+
+.home-green .home-name {
+    border-color: var(--green);
+}
+
+.home-yellow .home-name {
+    border-color: var(--yellow);
 }
 
 .token-pocket {
@@ -257,6 +308,8 @@ h1 span {
     color: #333;
 }
 
+
+
 .home-dice.active-dice {
     pointer-events: auto;
     opacity: 1;
@@ -316,12 +369,32 @@ h1 span {
     border-radius: 50%;
     display: flex;
     justify-content: center;
+    display: flex;
+    justify-content: center;
     align-items: center;
 }
 
+.center-area .token {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0 !important;
+    /* Override potential offsets */
+}
+
+
 /* Paths */
-.path-cell {
-    background: white;
+body {
+    background: radial-gradient(circle at center, #2b32b2, #1488cc);
+    /* Deep Royal Blue Gradient */
+    font-family: var(--font-main);
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    min-height: 100vh;
 }
 
 /* Specialized Colors for Paths */
@@ -362,28 +435,35 @@ h1 span {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    border: 3px solid rgba(0, 0, 0, 0.2);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow:
+        inset -5px -5px 10px rgba(0, 0, 0, 0.3),
+        /* Core shadow */
+        inset 5px 5px 10px rgba(255, 255, 255, 0.4),
+        /* Highlight */
+        0 5px 10px rgba(0, 0, 0, 0.4);
+    /* Drop Shadow */
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 10;
     position: absolute;
 }
 
+/* Specific gradients for 3D look */
 .token.red {
-    background: linear-gradient(135deg, #ff4757, #c0392b);
+    background: radial-gradient(circle at 30% 30%, #ff6b6b, #ee5253);
 }
 
 .token.green {
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    background: radial-gradient(circle at 30% 30%, #1dd1a1, #10ac84);
 }
 
 .token.blue {
-    background: linear-gradient(135deg, #3742fa, #2980b9);
+    background: radial-gradient(circle at 30% 30%, #54a0ff, #2e86de);
 }
 
 .token.yellow {
-    background: linear-gradient(135deg, #f1c40f, #f39c12);
+    background: radial-gradient(circle at 30% 30%, #feca57, #ff9f43);
 }
 
 .token:hover {
@@ -411,39 +491,53 @@ h1 span {
     }
 }
 
-/* Controls */
+/* Glassmorphism Controls */
 .game-controls {
-    background: #2f3542;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     padding: 30px;
     border-radius: 20px;
     width: 320px;
     text-align: center;
     color: white;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-.small-controls {
-    width: auto;
-    padding: 20px;
-}
-
-.status-msg {
-    margin-top: 10px;
-    font-weight: bold;
+.ludo-board {
+    width: 600px;
+    height: 600px;
+    background: #fff;
+    border: 8px solid #2f3542;
+    border-radius: 20px;
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(15, 1fr);
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.5),
+        inset 0 0 0 2px rgba(0, 0, 0, 0.1);
+    position: relative;
 }
 
 .btn {
     padding: 15px 30px;
     border: none;
-    border-radius: 10px;
-    font-weight: bold;
+    border-radius: 12px;
+    font-weight: 700;
     font-size: 1rem;
     cursor: pointer;
-    background: linear-gradient(135deg, #3742fa, #5352ed);
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
     color: white;
     font-family: inherit;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.3s ease;
     width: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 14px rgba(108, 92, 231, 0.4);
 }
 
 .btn-secondary {

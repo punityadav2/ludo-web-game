@@ -14,9 +14,11 @@ const gameState = {
     },
     isAnimating: false,
     isMuted: false,
-    awaitingMove: false
+    awaitingMove: false,
+    consecutiveSixes: 0
 };
 // ...
+
 let selectedPlayerCount = 4;
 
 function prepareGame(count) {
@@ -43,6 +45,9 @@ function prepareGame(count) {
 `;
     });
 }
+
+// (Inside rollDice)
+
 
 function resetStartScreen() {
     document.getElementById('name-inputs').style.display = 'none';
@@ -124,37 +129,58 @@ function finalizeMove(color, tokenIndex, newPos) {
     renderTokens();
     const val = gameState.diceValue;
     gameState.diceValue = null;
-    const diceEl = document.getElementById(`dice - ${color} `);
+    const diceEl = document.getElementById(`dice-${color}`);
     if (diceEl) diceEl.innerText = val;
 
     // Check for Win (Finish)
     if (newPos === 57) {
-        playSound('win');
+        // Only play trivial sound or extra turn sound?
+        // User requested: "play the win music when all the tokens... complete"
+        // So for single token, we do NOT play win music.
+        // Maybe play 'roll' or nothing.
 
         // Did player finish ALL tokens?
         if (gameState.tokens[color].every(p => p === 57)) {
+            playSound('win'); // Play WIN music only here
+
             if (!gameState.finishedPlayers.includes(color)) {
                 gameState.finishedPlayers.push(color);
                 alert(`${color.toUpperCase()} Finished #${gameState.finishedPlayers.length} !`);
             }
 
             // Check Match Over (All but one finished)
-            // Or if 2 players, 1 winner ends it.
             if (gameState.finishedPlayers.length >= gameState.players.length - 1) {
                 showGameOver();
                 return;
             }
         } else {
+            // Single token finished
+            playSound('roll'); // Simple feedback
             alert(`${color.toUpperCase()} Token Finished!`);
         }
 
         setTimeout(() => updateUI(), 500);
 
-        // Extra turn for finishing? Standard rules usually yes.
-        // If player completely finished, they don't get turn, passes to next.
+        // Extra turn for finishing? Yes.
         if (gameState.finishedPlayers.includes(color)) {
-            nextTurn();
+            nextTurn(); // If player is done, pass turn
             return;
+        }
+
+        // Extra turn (Standard Rule: reaching home gives extra turn)
+        // Reset awaitingMove to allow rollDice
+        gameState.isAnimating = false;
+        gameState.awaitingMove = false;
+        // Dice is already cleared in UI but logical value is null.
+        // We need to enable dice for Current Player again.
+        // checkPossibleMoves() would usually do this but we cleared dice.
+
+        // Let's explicitly enable re-roll
+        const diceEl = document.getElementById(`dice-${color}`);
+        if (diceEl) {
+            diceEl.style.pointerEvents = 'auto';
+            diceEl.style.opacity = '1';
+            diceEl.innerText = '🎲'; // Reset to icon for new roll
         }
         return;
     }
@@ -176,8 +202,8 @@ function nextTurn() {
 
     // Update visuals
     const prevColor = gameState.players[(gameState.currentPlayerIndex - 1 + gameState.players.length) % gameState.players.length];
-    if (document.getElementById(`dice - ${prevColor} `)) {
-        document.getElementById(`dice - ${prevColor} `).innerText = '🎲';
+    if (document.getElementById(`dice-${prevColor}`)) {
+        document.getElementById(`dice-${prevColor}`).innerText = '🎲';
     }
 
     updateUI();
@@ -269,7 +295,7 @@ const mainPath = [
     [14, 7], [14, 6],
     // Up Blue Arm (Left side)
     [13, 6], [12, 6], [11, 6], [10, 6], [9, 6],
-     
+
 ];
 
 function generatePath() {
@@ -345,19 +371,19 @@ function renderBoard() {
 
             // Homes
             if (row < 6 && col < 6) {
-                if (row === 0 && col === 0) boardContainer.appendChild(createHome('red', 'home-red'));
+                if (row === 0 && col === 0) boardContainer.appendChild(createHome('red', 'home-red', gameState.playerNames['red']));
                 continue;
             }
             if (row < 6 && col > 8) {
-                if (row === 0 && col === 9) boardContainer.appendChild(createHome('green', 'home-green'));
+                if (row === 0 && col === 9) boardContainer.appendChild(createHome('green', 'home-green', gameState.playerNames['green']));
                 continue;
             }
             if (row > 8 && col < 6) {
-                if (row === 9 && col === 0) boardContainer.appendChild(createHome('blue', 'home-blue'));
+                if (row === 9 && col === 0) boardContainer.appendChild(createHome('blue', 'home-blue', gameState.playerNames['blue']));
                 continue;
             }
             if (row > 8 && col > 8) {
-                if (row === 9 && col === 9) boardContainer.appendChild(createHome('yellow', 'home-yellow'));
+                if (row === 9 && col === 9) boardContainer.appendChild(createHome('yellow', 'home-yellow', gameState.playerNames['yellow']));
                 continue;
             }
             // Center
@@ -394,9 +420,16 @@ function renderBoard() {
     renderTokens();
 }
 
-function createHome(color, className) {
+function createHome(color, className, playerName) {
     const home = document.createElement('div');
     home.className = `home-area ${className}`;
+
+    // Name Label
+    const nameLabel = document.createElement('div');
+    nameLabel.className = 'home-name';
+    nameLabel.innerText = playerName || color.toUpperCase();
+    home.appendChild(nameLabel);
+
     ['0', '1', '2', '3'].forEach((idx, i) => {
         const pocket = document.createElement('div');
         pocket.className = `token-pocket tp-${i}`; // Use CSS positions
@@ -453,6 +486,9 @@ function renderTokens() {
                 if (targetContainer.children.length > 1 && pos !== 57) {
                     const offset = (targetContainer.children.length - 1) * 5;
                     token.style.transform = `translate(${offset}px, ${offset}px)`;
+                } else if (pos === 57 && targetContainer.children.length > 1) {
+                    // Optional: slight scatter for finished tokens?
+                    // Let's leave it stacked for now to ensure centering works.
                 }
             }
         });
@@ -480,12 +516,12 @@ function getCoordinates(color, steps) {
     if (color === 'yellow') offset = 26;
     if (color === 'blue') offset = 39;
 
-    if (steps < 52) {
+    if (steps < 51) {
         let globalIndex = (steps + offset) % 52;
         return globalPath[globalIndex];
     } else {
         // Home Stretch Logic
-        const stretchIndex = steps - 52; // 0 to 5
+        const stretchIndex = steps - 51; // 0 to 5
         // Red: (7, 1) -> (7, 5)
         if (color === 'red') return [7, 1 + stretchIndex];
         if (color === 'green') return [1 + stretchIndex, 7];
@@ -504,6 +540,30 @@ function rollDice(clickedColor) {
 
     const val = Math.floor(Math.random() * 6) + 1;
     gameState.diceValue = val;
+
+    // Triple 6 Rule Logic
+    if (val === 6) {
+        gameState.consecutiveSixes++;
+        if (gameState.consecutiveSixes === 3) {
+            // Animate 3rd val then skip
+            const diceEl = document.getElementById(`dice-${activeColor}`);
+            playSound('roll');
+            diceEl.classList.add('rolling');
+
+            setTimeout(() => {
+                diceEl.classList.remove('rolling');
+                diceEl.innerText = val;
+                setTimeout(() => {
+                    alert("Three consecutive 6s! Turn Skipped.");
+                    gameState.consecutiveSixes = 0;
+                    nextTurn();
+                }, 500);
+            }, 500);
+            return;
+        }
+    } else {
+        gameState.consecutiveSixes = 0;
+    }
 
     // Animate Dice
     const diceEl = document.getElementById(`dice-${activeColor}`);
@@ -691,8 +751,9 @@ function nextTurn() {
 
 function updateUI() {
     const color = gameState.players[gameState.currentPlayerIndex];
+    const name = gameState.playerNames[color] || color.toUpperCase();
     const msg = document.getElementById('status-message');
-    if (msg) msg.innerText = `${color.toUpperCase()}'s Turn`;
+    if (msg) msg.innerText = `${name}'s Turn`;
 
     // Highlight Active Dice
     document.querySelectorAll('.home-dice').forEach(d => {
