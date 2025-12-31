@@ -1,0 +1,507 @@
+:root {
+    --bg-color: #1a1a2e;
+    --board-bg: #fff;
+    --red: #ff4757;
+    --green: #2ecc71;
+    --yellow: #f1c40f;
+    --blue: #3742fa;
+    --safe-color: #dfe4ea;
+    --border-color: #2f3542;
+    --text-color: #fff;
+    --font-main: 'Outfit', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: var(--font-main);
+    color: var(--text-color);
+    display: flex;
+    /* Flexbox execution */
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.winner-list {
+    margin: 20px 0;
+    text-align: left;
+    width: 100%;
+}
+
+.rank-item {
+    background: rgba(255, 255, 255, 0.1);
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2rem;
+}
+
+.rank-1 {
+    border: 2px solid #ffd700;
+    color: #ffd700;
+}
+
+/* Gold */
+.rank-2 {
+    border: 2px solid #c0c0c0;
+    color: #c0c0c0;
+}
+
+/* Silver */
+.rank-3 {
+    border: 2px solid #cd7f32;
+    color: #cd7f32;
+}
+
+/* Bronze */
+
+h1 {
+    font-weight: 900;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+h1 span {
+    color: var(--yellow);
+}
+
+/* Start Screen */
+.start-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(26, 26, 46, 0.95);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.start-content {
+    text-align: center;
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    color: #2f3542;
+}
+
+.player-selection {
+    display: flex;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.btn-select {
+    background: var(--blue);
+    font-size: 1.2rem;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.game-layout {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* --- BOARD GRID --- */
+.ludo-board {
+    width: 600px;
+    height: 600px;
+    background: var(--board-bg);
+    border: 5px solid var(--border-color);
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(15, 1fr);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.cell {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Homes */
+.home-area {
+    grid-row: span 6;
+    grid-column: span 6;
+    border: 2px solid var(--border-color);
+    padding: 30px;
+    display: grid;
+    place-items: center;
+}
+
+.home-red {
+    background-color: var(--red);
+    grid-area: 1 / 1 / 7 / 7;
+}
+
+.home-green {
+    background-color: var(--green);
+    grid-area: 1 / 10 / 7 / 16;
+}
+
+.home-blue {
+    background-color: var(--blue);
+    grid-area: 10 / 1 / 16 / 7;
+}
+
+.home-yellow {
+    background-color: var(--yellow);
+    grid-area: 10 / 10 / 16 / 16;
+}
+
+.token-pocket {
+    background: white;
+    width: 100px;
+    /* grouped container */
+    height: 100px;
+    /* grouped */
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
+    padding: 10px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+    /* Actually script creates multiple pockets? Let's fix CSS to handle the structure */
+}
+
+/* Re-fix: script creates 4 separate pockets currently? */
+/* In script: createHome appends 4 separate divs with class .token-pocket directly to .home-area */
+/* So .home-area should be a 2x2 grid */
+.home-area {
+    position: relative;
+    /* padding: 0; Remove grid */
+    display: block;
+}
+
+.token-pocket {
+    position: absolute;
+    width: 35%;
+    /* Smaller pockets */
+    height: 35%;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Positions */
+.tp-0 {
+    top: 10%;
+    left: 10%;
+}
+
+.tp-1 {
+    top: 10%;
+    right: 10%;
+}
+
+.tp-2 {
+    bottom: 10%;
+    left: 10%;
+}
+
+.tp-3 {
+    bottom: 10%;
+    right: 10%;
+}
+
+/* Small Dice in Home */
+.home-dice {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    background: white;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 50;
+    pointer-events: none;
+    /* Disabled by default */
+    opacity: 0.5;
+    color: #333;
+}
+
+.home-dice.active-dice {
+    pointer-events: auto;
+    opacity: 1;
+    border-color: var(--yellow);
+    box-shadow: 0 0 15px var(--yellow);
+    animation: pulse-dice 1.5s infinite;
+}
+
+@keyframes pulse-dice {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.home-dice.rolling {
+    animation: roll-small 0.5s infinite linear;
+}
+
+@keyframes roll-small {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Center Finish */
+.center-area {
+    grid-area: 7 / 7 / 10 / 10;
+    background: conic-gradient(var(--green) 0deg 90deg,
+            var(--yellow) 90deg 180deg,
+            var(--blue) 180deg 270deg,
+            var(--red) 270deg 360deg);
+    position: relative;
+    border: 2px solid var(--border-color);
+}
+
+.center-area::after {
+    content: '🏆';
+    font-size: 2rem;
+    background: white;
+    width: 40%;
+    height: 40%;
+    position: absolute;
+    top: 30%;
+    left: 30%;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Paths */
+.path-cell {
+    background: white;
+}
+
+/* Specialized Colors for Paths */
+.path-red {
+    background: var(--red);
+}
+
+.path-green {
+    background: var(--green);
+}
+
+.path-blue {
+    background: var(--blue);
+}
+
+.path-yellow {
+    background: var(--yellow);
+}
+
+/* Safe Spots */
+.safe-spot::before {
+    content: '★';
+    font-size: 1.5rem;
+    color: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+    /* Below token */
+}
+
+.path-red.safe-spot::before,
+.path-green.safe-spot::before,
+.path-blue.safe-spot::before,
+.path-yellow.safe-spot::before {
+    color: white;
+}
+
+/* Tokens */
+.token {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 3px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10;
+    position: absolute;
+}
+
+.token.red {
+    background: linear-gradient(135deg, #ff4757, #c0392b);
+}
+
+.token.green {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.token.blue {
+    background: linear-gradient(135deg, #3742fa, #2980b9);
+}
+
+.token.yellow {
+    background: linear-gradient(135deg, #f1c40f, #f39c12);
+}
+
+.token:hover {
+    transform: scale(1.2);
+}
+
+.token.valid-move {
+    box-shadow: 0 0 15px 5px rgba(255, 255, 0, 0.8) !important;
+    animation: pulse-token 1s infinite;
+    z-index: 100;
+    cursor: pointer !important;
+}
+
+@keyframes pulse-token {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Controls */
+.game-controls {
+    background: #2f3542;
+    padding: 30px;
+    border-radius: 20px;
+    width: 320px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.small-controls {
+    width: auto;
+    padding: 20px;
+}
+
+.status-msg {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.btn {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    background: linear-gradient(135deg, #3742fa, #5352ed);
+    color: white;
+    font-family: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+    width: 100%;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #7f8c8d, #2c3e50);
+    margin-top: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.name-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.player-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.player-input-group label {
+    width: 60px;
+    text-transform: capitalize;
+    font-weight: bold;
+}
+
+.player-input-group input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(55, 66, 250, 0.4);
+}
+
+@media (max-width: 900px) {
+    .ludo-board {
+        width: 95vw;
+        height: 95vw;
+    }
+
+    .game-controls {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .token {
+        width: 5vw;
+        height: 5vw;
+        border-width: 2px;
+    }
+}
